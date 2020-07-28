@@ -188,8 +188,13 @@ namespace Microsoft.ML.Trainers.LightGbm
 
         public InternalTreeEnsemble GetModel(int[] categoricalFeatureBoudaries)
         {
-            InternalTreeEnsemble res = new InternalTreeEnsemble();
             string modelString = GetModelString();
+            return GetModel(categoricalFeatureBoudaries, modelString);
+        }
+
+        public static InternalTreeEnsemble GetModel(int[] categoricalFeatureBoudaries, string modelString)
+        {
+            InternalTreeEnsemble res = new InternalTreeEnsemble();
             string[] lines = modelString.Split('\n');
             int i = 0;
             for (; i < lines.Length;)

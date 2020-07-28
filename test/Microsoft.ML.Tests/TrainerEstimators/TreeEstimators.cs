@@ -328,6 +328,13 @@ namespace Microsoft.ML.Tests.TrainerEstimators
             Done();
         }
 
+        [LightGBMFact]
+        public void LightGbmLoadFromFile()
+        {
+            // var tree = ML.Model.LoadLightGbmModel("/Users/ksilva/code/comp_price/competitor_price/lgbm.txt");
+            
+        }
+
         /// <summary>
         /// LightGbmMulticlass CorrectSigmoid test
         /// </summary>

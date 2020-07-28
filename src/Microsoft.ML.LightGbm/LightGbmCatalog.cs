@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Microsoft.ML.Data;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Trainers.LightGbm;
@@ -224,6 +227,32 @@ namespace Microsoft.ML
             Contracts.CheckValue(catalog, nameof(catalog));
             var env = CatalogUtils.GetEnvironment(catalog);
             return new LightGbmMulticlassTrainer(env, options);
+        }
+
+        public static RegressionPredictionTransformer<LightGbmRegressionModelParameters> LoadLightGbmModel(this ModelOperationsCatalog catalog, string fileName, DataViewSchema schema, string featureColumn)
+        {
+            StringBuilder sbModel = new StringBuilder();
+            Dictionary<string, string> kv = new Dictionary<string, string>();
+            bool treesStarted = false;
+
+            foreach(string line in File.ReadLines(fileName))
+            {
+                sbModel.AppendLine(line);
+                if(!treesStarted)
+                {
+                    var vals = line.Split('=');
+                    if (vals.Length == 2)
+                    {
+                        kv.Add(vals[0].Trim(), vals[1].Trim());
+                    }
+                    treesStarted = line.StartsWith("Tree=");
+                }
+            }
+            // var modelString = sbModel.ToString();
+            int maxFeatures = int.Parse( kv["max_feature_idx"]) + 1;
+            var bst = Booster.GetModel(null, sbModel.ToString());
+            var options =  new LightGbmRegressionModelParameters(catalog.GetEnvironment(), bst, maxFeatures, null);
+            return new RegressionPredictionTransformer<LightGbmRegressionModelParameters>(catalog.GetEnvironment(), options, schema, featureColumn);
         }
     }
 }
